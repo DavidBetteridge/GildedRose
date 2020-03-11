@@ -9,11 +9,25 @@ namespace csharpcore
         public const string AgedBrie = "Aged Brie";
         public const string Sulfuras = "Sulfuras, Hand of Ragnaros";
         public const string BackstagePasses = "Backstage passes to a TAFKAL80ETC concert";
+        public const string Conjured = "Conjured";
     }
 
 
     public class GildedRoseTest
     {
+        [Fact(DisplayName = "Conjured items decrease in quality by 2 each day.")]
+        public void ConjuredDecreasesByTwoEachTime()
+        {
+            const int APositiveValue = 2;
+
+            var Items = new List<Item> { new Item { Name = ItemName.Conjured, SellIn = APositiveValue, Quality = 10 } };
+            var app = new GildedRose(Items);
+            app.UpdateQuality();
+
+            Assert.Equal(8, Items[0].Quality);
+        }
+
+
         [Fact(DisplayName ="Normal items decrease in quality by 1 each day.")]
         public void QualityDecreasesByOneEachTime()
         {
@@ -34,11 +48,20 @@ namespace csharpcore
         {
             const int AnyThing = 123;
 
-            var Items = new List<Item> { new Item { Name = ItemName.ANormalItem, SellIn = initialValue, Quality = AnyThing } };
+            var Items = new List<Item> 
+            { 
+                new Item { Name = ItemName.ANormalItem, SellIn = initialValue, Quality = AnyThing },
+                new Item { Name = ItemName.BackstagePasses, SellIn = initialValue, Quality = AnyThing },
+                new Item { Name = ItemName.AgedBrie, SellIn = initialValue, Quality = AnyThing },
+                new Item { Name = ItemName.Conjured, SellIn = initialValue, Quality = AnyThing }
+            };
             var app = new GildedRose(Items);
             app.UpdateQuality();
 
             Assert.Equal(expectedValue, Items[0].SellIn);
+            Assert.Equal(expectedValue, Items[1].SellIn);
+            Assert.Equal(expectedValue, Items[2].SellIn);
+            Assert.Equal(expectedValue, Items[3].SellIn);
         }
 
         [Theory(DisplayName = "Item quality is only decreased when above zero.")]
