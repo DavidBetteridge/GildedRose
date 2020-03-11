@@ -5,50 +5,41 @@ namespace csharpcore
 {
     public class GildedRose
     {
-        IList<Item> Items;
+        private readonly IList<Item> _items;
         public GildedRose(IList<Item> Items)
         {
-            this.Items = Items;
+            _items = Items;
         }
 
         public void UpdateQuality()
         {
-            foreach (var item in Items)
-            {
+            foreach (var item in _items)
                 UpdateItem(item);
-            }
         }
 
         private void UpdateItem(Item item)
         {
-            var qualityUpdaterForItem = QualityUpdaterForItem(item);
-            var sellInUpdaterForItem = SellInUpdaterForItem(item);
+            item.Quality = item.Name switch
+            {
+                "Aged Brie" when item.Quality >= 50 => item.Quality,
+                "Aged Brie" => item.Quality + 1,
+                "Backstage passes to a TAFKAL80ETC concert" when item.SellIn > 10 => item.Quality + 1,
+                "Backstage passes to a TAFKAL80ETC concert" when item.SellIn > 5 => item.Quality + 2,
+                "Backstage passes to a TAFKAL80ETC concert" when item.SellIn > 0 => item.Quality + 3,
+                "Backstage passes to a TAFKAL80ETC concert" => 0,
+                "Sulfuras, Hand of Ragnaros" => item.Quality,
+                "Conjured" => Math.Max(0, item.Quality - 2),
+                _ when item.Quality <= 0 => item.Quality,
+                _ when item.SellIn <= 0 => Math.Max(0, item.Quality - 2),
+                _ => Math.Max(0, item.Quality - 1),
+            };
 
-            item.Quality = qualityUpdaterForItem(item.Quality);
-            item.SellIn = sellInUpdaterForItem(item.SellIn);
+            item.SellIn = item.Name switch
+            {
+                "Sulfuras, Hand of Ragnaros" => item.SellIn,
+                _ => item.SellIn - 1,
+            };
         }
 
-        private Func<int, int> SellInUpdaterForItem(Item item) =>
-            item.Name switch
-            {
-                "Sulfuras, Hand of Ragnaros" => (Quality) => Quality,
-                _ => (SellIn) => SellIn - 1,
-            };
-
-        private Func<int, int> QualityUpdaterForItem(Item item) =>
-            item.Name switch
-            {
-                "Aged Brie" when item.Quality >= 50 => (Quality) => Quality,
-                "Aged Brie" => (Quality) => Quality + 1,
-                "Backstage passes to a TAFKAL80ETC concert" when item.SellIn > 10 => (Quality) => Quality + 1,
-                "Backstage passes to a TAFKAL80ETC concert" when item.SellIn > 5 => (Quality) => Quality + 2,
-                "Backstage passes to a TAFKAL80ETC concert" when item.SellIn > 0 => (Quality) => Quality + 3,
-                "Backstage passes to a TAFKAL80ETC concert" => (Quality) => 0,
-                "Sulfuras, Hand of Ragnaros" => (Quality) => Quality,
-                _ when item.Quality <= 0 => (Quality) => Quality,
-                "Conjured" => (Quality) => Math.Max(0, Quality - 2),
-                _ when item.SellIn <= 0 => (Quality) => Math.Max(0, Quality - 2),
-                _ => (Quality) => Math.Max(0, Quality - 1),
-            };
     }
 }
